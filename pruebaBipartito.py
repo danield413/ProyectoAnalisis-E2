@@ -52,7 +52,9 @@ def esBipartita(matriz):
 
     # Determinar si hay una fila o una columna con ceros
     hay_ceros = filas_ceros == 1 or columnas_ceros == 1
-    k = 2
+    k = 0
+    if(hay_ceros):
+        k = 2
 
     if filas_ceros > 1 or columnas_ceros > 1 or (filas_ceros + columnas_ceros) > 1:
         hay_ceros = False
