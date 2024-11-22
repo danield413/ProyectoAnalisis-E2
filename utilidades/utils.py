@@ -2,7 +2,6 @@ import numpy as np
 from scipy.stats import wasserstein_distance
 
 def generarMatrizPresenteInicial(n):
-    print(n)
     # Generar un array de números de 0 a 2^n - 1
     combinaciones = np.arange(2 ** n, dtype=np.uint32)
     

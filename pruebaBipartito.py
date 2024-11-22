@@ -1,14 +1,6 @@
 import numpy as np
 
 
-
-subconjuntoSistemaCandidato = np.array([
-    'at-at+1', 'at-bt+1', 'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1', 'ct-bt+1', 'ct-ct+1'
-])
-
-aristas = ['at-at+1', 'bt-at+1']
-aristas2 = ['at-at+1', 'at-bt+1', 'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1']
-
 #?Metodo que recibe el subconjunto del sistema candidato y me saca en una lista los elementos en t y en otra los elementos en t+1 sin repetidos
 def obtenerElementosEnT(subconjuntoSistemaCandidato):
     elementosEnT = []
@@ -71,7 +63,12 @@ def esBipartita(matriz):
 
 
 
+subconjuntoSistemaCandidato = np.array([
+    'at-at+1', 'at-bt+1', 'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1', 'ct-bt+1', 'ct-ct+1'
+])
 
+aristas = ['at-at+1', 'bt-at+1', 'ct-at+1']
+aristas2 = ['at-at+1', 'at-bt+1', 'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1']
 
 matriz = (crearMatrizDeAdyacencia(aristas2, subconjuntoSistemaCandidato))
 print(matriz)
