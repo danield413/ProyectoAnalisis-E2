@@ -9,6 +9,8 @@ from utilidades.utils import generarMatrizPresenteInicial, producto_tensorial_n
 from utilidades.utils import generarMatrizFuturoInicial
 from utilidades.utils import elementosNoSistemaCandidato
 from utilidades.utils import producto_tensorial
+from utilidades.utils import obtenerVectorProbabilidadTPM
+from utilidades.utils import calcularEMD
 from utilidades.partirRepresentacion import partirRepresentacion
 from utilidades.vectorProbabilidad import obtenerVectorProbabilidad
 
@@ -91,4 +93,51 @@ partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM = partirRepres
 
 
    
-print( obtenerVectorProbabilidad(['at-bt+1', 'ct-at+1', 'bt-bt+1', 'at-ct+1', 'ct-ct+1'], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente) )
+vector1 = obtenerVectorProbabilidad(['at-at+1', 'bt-at+1', 'ct-at+1'], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
+
+vector2 = obtenerVectorProbabilidadTPM(estadoActualElementos, nuevaTPM, subconjuntoElementos, nuevaMatrizPresente)
+
+print("Vector 1", vector1)
+print("Vector 2", vector2)
+
+print("Diferencia", calcularEMD(vector1, vector2))
+
+
+
+def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos):
+    #* ESCRIBIR TODA LA LOGICA DEL ALGORITMO AQUI
+    A = subconjuntoSistemaCandidato
+    
+    W = []
+    W[0] = []
+    W[1] = [ A[0] ]
+    
+    restas = []
+    
+    for i in range( 2, len(A) + 1 ):
+        elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
+        
+        for elemento in elementosRecorrer:
+            wi_1Uelemento = W[i-1] + [elemento]
+            
+            u = elemento
+            
+            # Calcula EMD(W[i-1] U {u})
+            
+            # Calcula EMD({u})
+            
+            # calcular diferencia
+            # EMD(W[i-1] U {u}) - EMD({u})
+            
+            # Verificar si se genera biparticion (le pase el W)
+            
+            # guardar elemento, emdw_1_u y emdu , diferencia
+            # restas.append((elemento, valorEMDFinal))
+        
+        #* Seleccionar el u que minimiza EMD(W[i-1] U {vi})
+        # usando el arreglo de restas y teniendo en cuenta los criterios
+        '''
+        1. Diferencia
+        2. EMD(W[i-1] U {u})
+        3. Bipartición
+        '''

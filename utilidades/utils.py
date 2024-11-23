@@ -94,3 +94,23 @@ def particionComplemento(particion1, subconjuntoSistemaCandidato):
                 faltantesT.append(i)
         
     return (faltantesT1, faltantesT)
+
+def obtenerVectorProbabilidadTPM(estadoActualElementos, matrizTPM, subconjuntoElementos, nuevaMatrizPresente):
+    estadosActuales = []
+    ordenColumnasPresente = []
+    for i in subconjuntoElementos:
+        ordenColumnasPresente.append(i)
+        
+    for i in estadoActualElementos:
+        if list(i.keys())[0] in ordenColumnasPresente:
+            estadosActuales.append(list(i.values())[0])
+            
+
+    indiceVector = -1
+    for i in range(len(nuevaMatrizPresente)):
+        if nuevaMatrizPresente[i].tolist() == estadosActuales:
+            indiceVector = i
+            break
+        
+    if indiceVector != -1:
+        return matrizTPM[indiceVector]

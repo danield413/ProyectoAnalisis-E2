@@ -21,6 +21,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             relaciones[futuro] = []
         relaciones[futuro].append(presente)
     
+    print(relaciones)
 
     #todo: mirar cuando se marginalizan todas las columnas que es lo que se hace
     #* ahora que tengo las relaciones sé en que matrices t+1 se marginalizan los elementos en t
