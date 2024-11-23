@@ -93,7 +93,7 @@ indicesElementosT = {list(elem.keys())[0]: idx for idx, elem in enumerate(estado
 # print("------ REPRESENTACIÓN -----------")
 partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM = partirRepresentacion(nuevaMatrizPresente, nuevaMatrizFuturo, nuevaTPM, elementosT1, nuevosIndicesElementos)
 
-#*ojo hacer las copias
+#*HACER COPIAS CON COPY.DEEPCOPY(...)
 def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos):
 
     # Diccionario donde se guardarán las relaciones
@@ -119,32 +119,37 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
     matricesResultado = []
     
     for matrizAMarginalizar in relaciones:
-        # print(matrizAMarginalizar)
         elementosPresentesAMarginalizar = relaciones[matrizAMarginalizar]
         
-        #TODO: mirar cuando se marginalizan todas las columnas que es lo que se hace
-        print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
+        #*: mirar cuando se marginalizan todas las columnas que es lo que se hace
         if len(elementosPresentesAMarginalizar) == len(partirMatricesPresentes[0]):
-            print("Marginalizar todas las columnas")
+            
+            val = []
+            
+            tpmActual = copy.deepcopy(partirMatricesTPM[matrizAMarginalizar])
+            
+            tpmActual = tpmActual.T
+            for i in range(len(tpmActual)):
+                suma = sum(tpmActual[i])
+                val.append(suma)
+            for i in range(len(val)):
+                val[i] = val[i] / len(tpmActual[0])
+
+            
+            matricesResultado.append({
+                matrizAMarginalizar: [val]
+            })
+            continue
         
         
         elementosPresentesNOAMarginalizar = [elem for elem in elementosT if elem not in elementosPresentesAMarginalizar]
         
-        # print(matrizAMarginalizar, elementosPresentesAMarginalizar)
-        
-        #* para cada elemento a marginalizar en la matriz
         mPresente = copy.deepcopy(partirMatricesPresentes)
         mFuturo = copy.deepcopy(partirMatricesFuturas[matrizAMarginalizar])
         tpmActual = copy.deepcopy(partirMatricesTPM[matrizAMarginalizar])
         
-        # print("mPresente", mPresente)
-        # print("mFuturo", mFuturo)
-        # print("tpmActual", tpmActual)
-            
         indicesElementosPresentesAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesAMarginalizar]
         indicesElementosPresentesNOAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesNOAMarginalizar]
-        # print("indicesElementosPresentesAMarginalizar", indicesElementosPresentesAMarginalizar)
-        # print("indicesElementosPresentesNOAMarginalizar", indicesElementosPresentesNOAMarginalizar)
         
         #* borrar las columnas de la matriz presente
         mPresente = mPresente.T
@@ -166,13 +171,6 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
 
         # Filtrar solo los grupos que se repiten (más de un índice)
         grupos_repetidos = {fila: indices for fila, indices in grupos_filas.items() if len(indices) > 1}
-        
-        # print("grupos_repetidos", grupos_repetidos)
-        
-        # print("> DEBUGEANDO <")
-        
-        # print("presente \n", mPresente)
-        # print("actual \n", tpmActual)
         
         for fila, indices in grupos_repetidos.items():
             # print(f"Grupo: {fila} - Indices: {indices}")
@@ -197,16 +195,12 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
 
         tpmActual = np.delete(tpmActual, filas_a_eliminar, axis=0)
         mPresente = np.delete(mPresente, filas_a_eliminar, axis=0)
-        
-        # print("presente \n", mPresente)
-        # print("actual \n", tpmActual)
 
         valores = {}
         for i in range(len(tpmActual)):
             valores[f'{mPresente[i]}'.replace(" ", "")] = tpmActual[i]
             
         #* expandir la matriz tpmActual si su longitud es menor a la de las otras tpm
-        # print(partirMatricesTPM)
         longitudATener = len(partirMatricesTPM[futuro])
         filasExpandir = longitudATener - len(tpmActual)
         
@@ -214,26 +208,10 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         
         matrizPresenteExpandida = generarMatrizPresenteInicial(int(x))
         
-        # print("matrizPresenteExpandida \n", matrizPresenteExpandida)
-        # print("tpmActual \n", tpmActual)
-        # print("valores \n", valores)
-        
-        # print(estadoActualElementos)
-        
-        # print(elementosPresentesNOAMarginalizar)
-        # print(indicesElementosPresentesNOAMarginalizar)
-        
         elementosNo = {}
         for i in range(len(elementosPresentesNOAMarginalizar)):
             elementosNo[elementosPresentesNOAMarginalizar[i]] = indicesElementosPresentesNOAMarginalizar[i]
             
-        # print("elementosNo", elementosNo)
-        
-        # elementosNo = {
-        #     'at': 0,
-        #     'ct': 2
-        # }
-        
         plantilla = ''
         for i in range(len(matrizPresenteExpandida[0])):
             plantilla += 'x'
@@ -253,15 +231,10 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             
             plantilla = ''.join(plantilla)
         
-        # print("plantilla", plantilla)
-        
         matrizComparar = []
         for i in range(len(matrizPresenteExpandida)):
             matrizComparar.append( str(matrizPresenteExpandida[i]).replace('[','').replace(']','').replace(' ','').replace(',','') )
                 
-        # print("matrizComparar", matrizComparar)
-        
-        
         resultado = []
         for elemento in matrizComparar:
             transformado = ''.join(c if c == 'x' else e for c, e in zip(plantilla, elemento))
@@ -269,13 +242,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
                     
             
         resultado_sin_x = [elemento.replace('x', '') for elemento in resultado]
-        # print("resultado_sin_x", resultado_sin_x)
-        
         tpmActualCopia = []
-        # print("tpmActualCopia", tpmActualCopia)
-        # print("valores", valores)
-        
-        # valores = {'[0]': np.array([0.3, 0.7]), '[1]': np.array([0.5, 0.5])}
         
         for i in range(len(resultado_sin_x)):
             tpmActualCopia.append(valores[f'[{resultado_sin_x[i]}]'])
@@ -283,8 +250,6 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         tpmActualCopia = np.array(tpmActualCopia)
         
         tpmActual = tpmActualCopia
-        # print("presente expandida \n", matrizPresenteExpandida)
-        # print("tpmActual \n", tpmActual)
         
         matricesResultado.append({
             matrizAMarginalizar: tpmActual
@@ -319,17 +284,18 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         
     vectoresFinales = []
     for matriz in vectoresUtilizar:
-        vectoresFinales.append(matriz[indiceVector])
+        print("m", matriz)
+        if len(matriz) == 1:
+            vectoresFinales.append(matriz[0])
+        else:
+            vectoresFinales.append(matriz[indiceVector])
         
-    # print("partirMatricesTPM", partirMatricesTPM)
-    print("matricesResultado", matricesResultado)
-    print("partirMatricesPresentes", partirMatricesPresentes)
-        
-    print("vectoresFinales", vectoresFinales)
      
     vectorFinal = producto_tensorial_n(vectoresFinales)
     
+    print("vectoresFinales", vectoresFinales)
     print("vectorFinal", vectorFinal)
+    return vectorFinal
    
 # obtenerVector(['at-at+1', 'bt-at+1'], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM)
-obtenerVector(['at-at+1', 'ct-at+1', 'bt-at+1'], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos)
+obtenerVector(['at-at+1', 'ct-at+1', 'bt-at+1', 'at-ct+1', 'ct-ct+1'], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos)
