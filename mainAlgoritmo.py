@@ -13,6 +13,8 @@ from utilidades.utils import obtenerVectorProbabilidadTPM
 from utilidades.utils import calcularEMD
 from utilidades.partirRepresentacion import partirRepresentacion
 from utilidades.vectorProbabilidad import obtenerVectorProbabilidad
+from pruebaBipartito import esBipartita
+from pruebaBipartito import crearMatrizDeAdyacencia
 
 #? ----------------- ENTRADAS DE DATOS ---------------------------------
 
@@ -113,6 +115,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
     W[1] = [ A[0] ]
     
     restas = []
+    informacionXElemento = []
     
     for i in range( 2, len(A) + 1 ):
         elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
@@ -123,16 +126,30 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             u = elemento
             
             # Calcula EMD(W[i-1] U {u})
-            
+            vectorProbabilidadUnion = obtenerVectorProbabilidad(wi_1Uelemento, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
+            vectorProbabilidadUnionTPM = obtenerVectorProbabilidadTPM(estadoActualElementos, nuevaTPM, subconjuntoElementos, nuevaMatrizPresente)
+            emdUnion = calcularEMD(vectorProbabilidadUnion, vectorProbabilidadUnionTPM) 
             # Calcula EMD({u})
+            vectorProbabilidadU = obtenerVectorProbabilidad([u], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
+            vectorProbabilidadUTPM = obtenerVectorProbabilidadTPM(estadoActualElementos, nuevaTPM, subconjuntoElementos, nuevaMatrizPresente)
+            emdU = calcularEMD(vectorProbabilidadU, vectorProbabilidadUTPM)
             
             # calcular diferencia
             # EMD(W[i-1] U {u}) - EMD({u})
+            valorEMDFinal = emdUnion - emdU    
             
             # Verificar si se genera biparticion (le pase el W)
-            
+            matrizAdyacencia = crearMatrizDeAdyacencia(wi_1Uelemento, subconjuntoSistemaCandidato)
+            biparticion = esBipartita(matrizAdyacencia)
             # guardar elemento, emdw_1_u y emdu , diferencia
-            # restas.append((elemento, valorEMDFinal))
+            informacionXElemento.append({
+                'elemento': elemento,
+                'emdW1U': emdUnion,
+                'emdU': emdU,
+                'diferencia': valorEMDFinal,
+                'biparticion': biparticion
+            })
+            restas.append((elemento, valorEMDFinal))
         
         #* Seleccionar el u que minimiza EMD(W[i-1] U {vi})
         # usando el arreglo de restas y teniendo en cuenta los criterios
