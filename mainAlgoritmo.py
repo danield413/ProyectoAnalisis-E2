@@ -127,6 +127,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
         print("Elementos a recorrer", elementosRecorrer)
         
+        print("W[i-1]: ", W[i-1])
         for elemento in elementosRecorrer:
             wi_1Uelemento = W[i-1] + [elemento]
             

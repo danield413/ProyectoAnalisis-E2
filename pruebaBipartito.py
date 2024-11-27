@@ -57,7 +57,7 @@ def esBipartita(matriz):
         'esBipartita': hay_ceros,
         'filas_ceros': filas_ceros,
         'columnas_ceros': columnas_ceros,
-        'k-particones':  k
+        'k-particiones':  k
     }
 
 
