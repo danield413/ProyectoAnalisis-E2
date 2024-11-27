@@ -114,3 +114,21 @@ def obtenerVectorProbabilidadTPM(estadoActualElementos, matrizTPM, subconjuntoEl
         
     if indiceVector != -1:
         return matrizTPM[indiceVector]
+    
+
+def buscarValorUPrima(listaDeU, uprima):
+    for u in listaDeU:
+        nombre = list(u.keys())[0]
+        if nombre == uprima:
+            # Llama recursivamente si algún valor contiene una 'u'
+            valor_resuelto = []
+            for elemento in u[nombre]:
+                if 'u' in elemento:
+                    # Obtener el valor sin 'u' embebidas recursivamente
+                    valor_resuelto.extend(buscarValorUPrima(listaDeU, elemento))
+                else:
+                    valor_resuelto.append(elemento)
+            return valor_resuelto
+    return []  # Devuelve una lista vacía si no se encuentra el uprima
+
+        

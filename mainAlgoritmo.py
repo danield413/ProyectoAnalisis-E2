@@ -15,6 +15,7 @@ from utilidades.partirRepresentacion import partirRepresentacion
 from utilidades.vectorProbabilidad import obtenerVectorProbabilidad
 from pruebaBipartito import esBipartita
 from pruebaBipartito import crearMatrizDeAdyacencia
+from utilidades.utils import buscarValorUPrima
 
 #? ----------------- ENTRADAS DE DATOS ---------------------------------
 
@@ -104,11 +105,13 @@ partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM = partirRepres
 
 # print("Diferencia", calcularEMD(vector1, vector2))
 
-
+listaDeUPrimas = []
+subconjuntoSistemaCandidatoCopia = copy.deepcopy(subconjuntoSistemaCandidato)
 
 def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos):
     #* ESCRIBIR TODA LA LOGICA DEL ALGORITMO AQUI
     A = subconjuntoSistemaCandidato
+    print("Llamado algoritmo", A)
     
     W = []
     for i in range(len(A)+1):
@@ -119,26 +122,31 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
     restas = []
     
     for i in range( 2, len(A) + 1 ):
-        
-        # if i == 3:
-        #     break
-        
         # print("iteracion", i)
-        elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
         
+        elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
+        print("Elementos a recorrer", elementosRecorrer)
         
         for elemento in elementosRecorrer:
             wi_1Uelemento = W[i-1] + [elemento]
-            # print("wi_1Uelemento", wi_1Uelemento)
             
-            u = elemento
+            u = [elemento]
+            
+            if 'u' in elemento:
+                valor = buscarValorUPrima(listaDeUPrimas, elemento)
+                u = valor
+                print(elemento, "es u", u)
+                wi_1Uelemento = W[i-1] + u
+            
             
             # Calcula EMD(W[i-1] U {u})
             vectorProbabilidadUnion = obtenerVectorProbabilidad(wi_1Uelemento, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
             vectorProbabilidadUnionTPM = obtenerVectorProbabilidadTPM(estadoActualElementos, nuevaTPM, subconjuntoElementos, nuevaMatrizPresente)
             emdUnion = calcularEMD(vectorProbabilidadUnion, vectorProbabilidadUnionTPM) 
             # Calcula EMD({u})
-            vectorProbabilidadU = obtenerVectorProbabilidad([u], partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
+            
+            
+            vectorProbabilidadU = obtenerVectorProbabilidad(u, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente)
             vectorProbabilidadUTPM = obtenerVectorProbabilidadTPM(estadoActualElementos, nuevaTPM, subconjuntoElementos, nuevaMatrizPresente)
             emdU = calcularEMD(vectorProbabilidadU, vectorProbabilidadUTPM)
             
@@ -147,16 +155,20 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             valorEMDFinal = emdUnion - emdU    
             
             # Verificar si se genera biparticion (le pase el W)
-            matrizAdyacencia = crearMatrizDeAdyacencia(wi_1Uelemento, subconjuntoSistemaCandidato)
+            # print("antes de llamar m ady", subconjuntoSistemaCandidato)
+            matrizAdyacencia = crearMatrizDeAdyacencia(W[i-1], subconjuntoSistemaCandidatoCopia)
             biparticion = esBipartita(matrizAdyacencia)
             # guardar elemento, emdw_1_u y emdu , diferencia
-            restas.append({
+            info = {
                 'elemento': elemento,
                 'emdW1U': emdUnion,
                 'emdU': emdU,
                 'diferencia': valorEMDFinal,
                 'biparticion': biparticion
-            })
+            }
+            #TODO: MIRAR LO DE LA VERIFICACION DE LAS K-PARTICIONES PARA EVITAR SEGUIRLAS GENERANDO
+            print(info)
+            restas.append(info)
         
         #* Seleccionar el u que minimiza EMD(W[i-1] U {vi})
         # usando el arreglo de restas y teniendo en cuenta los criterios
@@ -165,28 +177,32 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         2. EMD(W[i-1] U {u})
         3. Bipartición
         '''
-         #* Seleccionar el u que minimiza EMD(W[i-1] U {vi})
         
         #* sacar las restas que tengan la menor diferencia (pueden ser varias)
         min_diferencia = min(d['diferencia'] for d in restas)
         restas_min_diferencia = [d for d in restas if d['diferencia'] == min_diferencia]
 
+        # print("Restas con menor diferencia")
+        # for x in restas_min_diferencia:
+        #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
+        
         #*Primer criterio: diferencia
-        print()
-        print("Restas con menor diferencia")
-        for x in restas_min_diferencia:
-            print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
+        # print()
+        # print("Restas con menor diferencia")
+        # for x in restas_min_diferencia:
+        #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
         
         if len(restas_min_diferencia) == 1:    
             restas_min_diferencia = restas_min_diferencia[0]
+            
         #* Segundo criterio: emdW1U
         elif len(restas_min_diferencia) > 1:
             min_emdW1U = min(d['emdW1U'] for d in restas_min_diferencia)
             emdW1U_min_valor = [d for d in restas_min_diferencia if d['emdW1U'] == min_emdW1U]
-            print()
-            print("Restas con menor emdW1U")
-            for x in emdW1U_min_valor:
-                print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
+            # print()
+            # print("Restas con menor emdW1U")
+            # for x in emdW1U_min_valor:
+            #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
                 
             #* Tercer criterio: biparticion
             
@@ -194,18 +210,26 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
                restas_min_diferencia = emdW1U_min_valor[0] 
             elif len(emdW1U_min_valor) > 1:
                 biparticion = [d for d in emdW1U_min_valor if d['biparticion']["esBipartita"] == True]
-                print()
-                print("Restas con biparticion")
+                # print()
+                # print("Restas con biparticion")
+                # print("Biparticion", biparticion)
                 
                 #* si hay varias que ya cumplen los tres criterios se elige la primera
                 if len(biparticion) >= 2:
                     restas_min_diferencia = biparticion[0]
                 elif len(biparticion) == 1:
                     restas_min_diferencia = biparticion[0]
+                    #* si no hay ninguna que cumpla con el tercer criterio significa que las que quedan no tienen biparticion por lo cual se tiene que elegir la que tenga menor diferencia
+                elif len(biparticion) == 0:
+                    #* ordernar la diferencia de menor a mayor
+                    emdW1U_min_valor = sorted(emdW1U_min_valor, key=lambda x: x['diferencia'])
+                    #* elegir la primera
+                    restas_min_diferencia = emdW1U_min_valor[0]
+                    
         elif restas_min_diferencia == 1:
             restas_min_diferencia = restas_min_diferencia[0]
             
-        print("min", restas_min_diferencia)
+        # print("Elegida \n", restas_min_diferencia)
         
         
         valoresI = copy.deepcopy(W[i-1])
@@ -220,15 +244,25 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
                     continue
                 #*agregar el elemento de la ultima posicion de x
                 SecuenciaResultante.append(x[-1])
-            print("SECUENCIA RESULTANTE", SecuenciaResultante)
+            # print("SECUENCIA RESULTANTE", SecuenciaResultante)
             parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
-            print("Par candidato", parCandidato)
+            # print("Par candidato", parCandidato)
     
-        # usando el arreglo de restas y teniendo en cuenta los criterios
-        '''
-        1. Diferencia
-        2. EMD(W[i-1] U {u})
-        3. Bipartición
-        '''
+            uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
+            nombreU = ""
+            if(len(listaDeUPrimas) == 0):
+                nombreU = "u1"
+            else:
+                nombreU = "u" + str(len(listaDeUPrimas) + 1)
+            listaDeUPrimas.append({nombreU: uActual})
+
+            #* nuevoA = los elementos de A que no son el par candidato + nombre del uActual
+            nuevoA = []
+            nuevoA = [elem for elem in A if elem not in parCandidato]
+            nuevoA = nuevoA + [nombreU]
+            
+            # print("Nuevo A", nuevoA)
+            # if len(nuevoA) >= 2:
+            #     algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
             
 algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos)

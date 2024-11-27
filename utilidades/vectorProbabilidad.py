@@ -10,6 +10,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
 
     #* Crear diccionario de relaciones
     #* Contiene la matriz futuro que debe ser marginalizada y los elementos presentes que se deben marginalizar
+    # print("conjunto", conjunto)
     for arista in conjunto:
         #* Separar presente y futuro
         x = arista.split('-')
