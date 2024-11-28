@@ -168,6 +168,8 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
                 'biparticion': biparticion
             }
             #TODO: MIRAR LO DE LA VERIFICACION DE LAS K-PARTICIONES PARA EVITAR SEGUIRLAS GENERANDO
+            if info['biparticion']["k-particiones"] > 2:
+                continue
             print(info)
             restas.append(info)
         
