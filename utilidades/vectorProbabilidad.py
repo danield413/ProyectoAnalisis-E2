@@ -1,17 +1,33 @@
 import copy
 import math
 import numpy as np
-from utilidades.utils import producto_tensorial_n, generarMatrizPresenteInicial
+from utilidades.utils import buscarValorUPrima, producto_tensorial_n, generarMatrizPresenteInicial
 
-def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente):
+def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente, listaDeUPrimas):
+
+    print("conjunto", conjunto)
+    # print("partirMatricesPresentes", partirMatricesPresentes)
 
     # Diccionario donde se guardarán las relaciones
     relaciones = {}
 
     #* Crear diccionario de relaciones
     #* Contiene la matriz futuro que debe ser marginalizada y los elementos presentes que se deben marginalizar
+    
+    nuevoConjunto = []
     for arista in conjunto:
+        if 'u' in arista:
+            valor = buscarValorUPrima(listaDeUPrimas, arista)
+            for val in valor:
+                nuevoConjunto.append(val)
+        else:
+            nuevoConjunto.append(arista)
+        
+    
+    for arista in nuevoConjunto:
         #* Separar presente y futuro
+        
+       
         x = arista.split('-')
         presente = x[0]
         futuro = x[1]
@@ -21,7 +37,6 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             relaciones[futuro] = []
         relaciones[futuro].append(presente)
     
-
     #* ahora que tengo las relaciones sé en que matrices t+1 se marginalizan los elementos en t
     # print(relaciones)
     
@@ -30,6 +45,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
     for matrizAMarginalizar in relaciones:
         #* Se toman sus elementos presentes a marginalizar
         elementosPresentesAMarginalizar = relaciones[matrizAMarginalizar]
+        print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
         
         #*Cuando se marginalizan todas las columnas de una matriz
         if len(elementosPresentesAMarginalizar) == len(partirMatricesPresentes[0]):
@@ -51,6 +67,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             })
             continue
         
+        print("ELEMENTOS T", elementosT)
         #* Se toman los elementos presentes que no se van a marginalizar
         elementosPresentesNOAMarginalizar = [elem for elem in elementosT if elem not in elementosPresentesAMarginalizar]
         
@@ -62,11 +79,26 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         #* Se toman los índices de los elementos presentes a marginalizar
         indicesElementosPresentesAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesAMarginalizar]
         indicesElementosPresentesNOAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesNOAMarginalizar]
+        print("indicesElementosPresentesNOAMarginalizar", indicesElementosPresentesNOAMarginalizar)
+        print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
+        print("indicesElementosPresentesAMarginalizar", indicesElementosPresentesAMarginalizar)
+
+        nuevosIndices = []
+        count = 0
+        for elem in elementosT:
+            if elem in elementosPresentesAMarginalizar:
+                nuevosIndices.append(count)
+            count += 1
+            
+        # print("nuevosIndices", nuevosIndices) 
         
         #* Se borran las columnas de la matriz presente que se van a marginalizar
         mPresente = mPresente.T
-        mPresente = np.delete(mPresente, indicesElementosPresentesAMarginalizar, axis=0)
+        mPresente = np.delete(mPresente, nuevosIndices, axis=0)
         mPresente = mPresente.T
+        
+        # print("mPresente", mPresente)
+        # print("tpmactual", tpmActual)
         
         #* Ya se eliminaron la(s) columna(s) de la matriz presente, ahora identificar los grupos que se repiten en filas
         
@@ -93,7 +125,8 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
                     for k in range(len(tpmActual[i])): #* <-- columnas
                         #* Sumar las columnas de las filas repetidas en la fila con el menor índice
                         tpmActual[menorIndice][k] += tpmActual[i][k]
-                    
+                    #* Marcar la fila que ya se sumó
+                    tpmActual[i] = [99] * len(tpmActual[i])
         
         #* Dividir las columnas de la fila con el menor índice entre la cantidad de índices     
         for fila, indices in grupos_repetidos.items():
@@ -108,6 +141,9 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
 
         tpmActual = np.delete(tpmActual, filas_a_eliminar, axis=0)
         mPresente = np.delete(mPresente, filas_a_eliminar, axis=0)
+        
+        print("mPresente", mPresente)
+        print("tpmactual", tpmActual)
 
         #* Tomar cada valor de la tpm y asociarlo a su respectiva fila de la TPM
         valores = {}
@@ -131,6 +167,23 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         plantilla = ''
         for i in range(len(matrizPresenteExpandida[0])):
             plantilla += 'x'
+
+        # print("plantilla", plantilla)
+        # print("elementosNo", elementosNo)
+        
+        elementosUtiles = elementosPresentesAMarginalizar + elementosPresentesNOAMarginalizar
+        # print("elementosUtiles", elementosUtiles)
+        # print("subconjuntoelementos", subconjuntoElementos)
+        
+        #* cambiar el indice
+        for elem in elementosNo:
+            indice = -1
+            for i in range(len(elementosUtiles)):
+                if elementosUtiles[i] == elem:
+                    indice = i
+                    break
+                
+            elementosNo[elem] = indice
         
         for i in elementosNo:
             val = elementosNo[i]
@@ -146,7 +199,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             plantilla[val] = str(v)
             
             plantilla = ''.join(plantilla)
-        
+            
         #* Matriz a comparar: se convierte la matriz expandida en un arreglo de strings
         matrizComparar = []
         for i in range(len(matrizPresenteExpandida)):
@@ -161,6 +214,8 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         #* Se eliminan las x de los strings
         resultado_sin_x = [elemento.replace('x', '') for elemento in resultado]
         tpmActualCopia = []
+        
+        print("valores", valores)
         
         #* Se toman los valores de la tpm que coinciden con los resultados sin x
         for i in range(len(resultado_sin_x)):
@@ -189,21 +244,36 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
     for i in subconjuntoElementos:
         ordenColumnasPresente.append(i)
         
+    print("ordenColumnasPresente", ordenColumnasPresente)
+    ordenColumnas = []
+    for i in ordenColumnasPresente:
+        if i in elementosT:
+            ordenColumnas.append(i)
+            
+    print("ordernColumnas", ordenColumnas)
+        
     for i in estadoActualElementos:
-        if list(i.keys())[0] in ordenColumnasPresente:
+        if list(i.keys())[0] in ordenColumnas:
             estadosActuales.append(list(i.values())[0])
             
-
+    print("estadosActuales", estadosActuales)
+    print("elementosT", elementosT)
+    
+    print("nuevaMatrizPresente", nuevaMatrizPresente)
     indiceVector = -1
     for i in range(len(nuevaMatrizPresente)):
         if nuevaMatrizPresente[i].tolist() == estadosActuales:
             indiceVector = i
             break
     
+    print("indiceVector", indiceVector)
+    
     #* Se toman los vectores de las matrices resultado usando el indiceVector
     vectoresUtilizar = []
     for matriz in matricesResultado:
         vectoresUtilizar.append(matriz[list(matriz.keys())[0]])
+        
+    print("vectoresUtilizar", vectoresUtilizar)
         
     #* Se toman los vectores que se van a multiplicar
     #* Si solo hay un vector, se toma directamente ese (sucede cuando se marginalizan todas las columnas de una matriz)
@@ -222,7 +292,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
 
 
 #* Metodo recubridor para obtener el vector de probabilidad
-def obtenerVectorProbabilidad(aristas, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente):
+def obtenerVectorProbabilidad(aristas, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente, listaDeUPrimas):
     matrizPresente = copy.deepcopy(partirMatricesPresentes)
     matricesFuturo = copy.deepcopy(partirMatricesFuturas)
     matricesTPM = copy.deepcopy(partirMatricesTPM)
@@ -231,4 +301,4 @@ def obtenerVectorProbabilidad(aristas, partirMatricesPresentes, partirMatricesFu
     elementosT = copy.deepcopy(elementosT)
     indicesElementosT = copy.deepcopy(indicesElementosT)
     
-    return obtenerVector(aristas, matrizPresente, matricesFuturo, matricesTPM, estadoActual, subconjunto, elementosT, indicesElementosT, nuevaMatrizPresente)
+    return obtenerVector(aristas, matrizPresente, matricesFuturo, matricesTPM, estadoActual, subconjunto, elementosT, indicesElementosT, nuevaMatrizPresente, listaDeUPrimas)

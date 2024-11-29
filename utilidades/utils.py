@@ -131,4 +131,48 @@ def buscarValorUPrima(listaDeU, uprima):
             return valor_resuelto
     return []  # Devuelve una lista vacía si no se encuentra el uprima
 
-        
+
+def filtrar_diccionarios_unicos(lista_diccionarios):
+    """
+    Filtra una lista de diccionarios eliminando los duplicados, considerando valores complejos como matrices y arrays.
+
+    Args:
+        lista_diccionarios (list): Lista de diccionarios a filtrar.
+
+    Returns:
+        list: Lista de diccionarios sin duplicados.
+    """
+    def convertir_a_hashable(d):
+        """
+        Convierte un diccionario en una tupla hashable, manejando estructuras como arrays, matrices y tipos de numpy.
+        """
+        if isinstance(d, dict):
+            return tuple(sorted((k, convertir_a_hashable(v)) for k, v in d.items()))
+        elif isinstance(d, (list, tuple)):
+            return tuple(convertir_a_hashable(x) for x in d)
+        elif isinstance(d, np.ndarray):
+            return tuple(map(tuple, d)) if d.ndim > 1 else tuple(d)  # Matrices o vectores
+        elif isinstance(d, (np.float64, np.int64)):  # Convertir numpy números a tipos nativos
+            return float(d) if isinstance(d, np.float64) else int(d)
+        else:
+            return d  # Tipos básicos (int, float, str, etc.)
+
+    # Crear un conjunto para identificar elementos únicos
+    vistos = set()
+    resultado = []
+    for diccionario in lista_diccionarios:
+        try:
+            hashable = convertir_a_hashable(diccionario)
+            if hashable not in vistos:
+                vistos.add(hashable)
+                resultado.append(diccionario)
+        except TypeError as e:
+            print(f"Error al procesar: {diccionario}, Error: {e}")
+
+    return resultado
+
+def seleccionarCandidata(particionesCandidatasFinales):
+    minimo = min(d['resultado'] for d in particionesCandidatasFinales)
+    particion = [d for d in particionesCandidatasFinales if d['resultado'] == minimo]
+    return particion[0]   
+            
