@@ -50,7 +50,12 @@ def esBipartita(matriz):
 
     if filas_ceros > 1 or columnas_ceros > 1 or (filas_ceros + columnas_ceros) > 1:
         hay_ceros = False
-        k = (filas_ceros + columnas_ceros) + 1
+        
+        #* si la matriz está totalmente llena de ceros
+        if np.all(matriz == 0):
+            k = (filas_ceros + columnas_ceros)
+        else:
+            k = (filas_ceros + columnas_ceros) + 1
 
 
     return {

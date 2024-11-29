@@ -13,8 +13,8 @@ from utilidades.utils import obtenerVectorProbabilidadTPM
 from utilidades.utils import calcularEMD
 from utilidades.partirRepresentacion import partirRepresentacion
 from utilidades.vectorProbabilidad import obtenerVectorProbabilidad
-from pruebaBipartito import esBipartita
-from pruebaBipartito import crearMatrizDeAdyacencia
+from utilidades.verificarParticiones import esBipartita
+from utilidades.verificarParticiones import crearMatrizDeAdyacencia
 from utilidades.utils import buscarValorUPrima
 
 #? ----------------- ENTRADAS DE DATOS ---------------------------------
