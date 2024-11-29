@@ -108,10 +108,11 @@ partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM = partirRepres
 listaDeUPrimas = []
 subconjuntoSistemaCandidatoCopia = copy.deepcopy(subconjuntoSistemaCandidato)
 
+particionesCandidatas = []
+
 def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos):
     #* ESCRIBIR TODA LA LOGICA DEL ALGORITMO AQUI
     A = subconjuntoSistemaCandidato
-    print("Llamado algoritmo", A)
     
     W = []
     for i in range(len(A)+1):
@@ -122,12 +123,14 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
     restas = []
     
     for i in range( 2, len(A) + 1 ):
-        # print("iteracion", i)
+        
+        # if i > 2:
+        #     break
         
         elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
-        print("Elementos a recorrer", elementosRecorrer)
+        # print("Elementos a recorrer", elementosRecorrer)
         
-        print("W[i-1]: ", W[i-1])
+        # print("W[i-1]: ", W[i-1])
         for elemento in elementosRecorrer:
             wi_1Uelemento = W[i-1] + [elemento]
             
@@ -136,7 +139,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             if 'u' in elemento:
                 valor = buscarValorUPrima(listaDeUPrimas, elemento)
                 u = valor
-                print(elemento, "es u", u)
+                # print(elemento, "es u", u)
                 wi_1Uelemento = W[i-1] + u
             
             
@@ -157,115 +160,111 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             
             # Verificar si se genera biparticion (le pase el W)
             # print("antes de llamar m ady", subconjuntoSistemaCandidato)
-            matrizAdyacencia = crearMatrizDeAdyacencia(W[i-1], subconjuntoSistemaCandidatoCopia)
+            matrizAdyacencia = crearMatrizDeAdyacencia(wi_1Uelemento, subconjuntoSistemaCandidatoCopia)
             biparticion = esBipartita(matrizAdyacencia)
             # guardar elemento, emdw_1_u y emdu , diferencia
             info = {
+                'RE1': {
+                    'aristas': wi_1Uelemento,
+                    'emd': emdUnion
+                },
+                'RE2': {
+                    'aristas': u,
+                    'emd': emdU
+                },
                 'elemento': elemento,
-                'emdW1U': emdUnion,
-                'emdU': emdU,
-                'diferencia': valorEMDFinal,
-                'biparticion': biparticion
+                'resultado': valorEMDFinal,
+                'distribucion': vectorProbabilidadUnion,
+                'biparticion': biparticion,
+                "matrizConexiones": matrizAdyacencia
             }
-            #TODO: MIRAR LO DE LA VERIFICACION DE LAS K-PARTICIONES PARA EVITAR SEGUIRLAS GENERANDO
-            if info['biparticion']["k-particiones"] > 2:
-                continue
-            print(info)
+            print("Info", info)
             restas.append(info)
         
         #* Seleccionar el u que minimiza EMD(W[i-1] U {vi})
-        # usando el arreglo de restas y teniendo en cuenta los criterios
-        '''
-        1. Diferencia
-        2. EMD(W[i-1] U {u})
-        3. Bipartición
-        '''
         
-        #* sacar las restas que tengan la menor diferencia (pueden ser varias)
-        min_diferencia = min(d['diferencia'] for d in restas)
-        restas_min_diferencia = [d for d in restas if d['diferencia'] == min_diferencia]
+        noBiparticion = [
+            elem for elem in restas 
+            if elem["biparticion"]["esBipartita"] == False and elem["biparticion"]["k-particiones"] == 0
+        ]
+        siBiparticion = [elem for elem in restas if elem["biparticion"]["esBipartita"] == True]
+        # print("No biparticion", noBiparticion)
+        # print("Si biparticion", siBiparticion)
+        
+        noParticionMenorDiferencia = None
+        siParticionMenorDiferencia = None
+        
+        if len(siBiparticion) > 0:
+            #* seleccionar la menor diferencia de EMD
+            minResultadoValor = min(siBiparticion, key=lambda x: x["resultado"])["resultado"]
 
-        # print("Restas con menor diferencia")
-        # for x in restas_min_diferencia:
-        #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
-        
-        #*Primer criterio: diferencia
-        # print()
-        # print("Restas con menor diferencia")
-        # for x in restas_min_diferencia:
-        #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
-        
-        if len(restas_min_diferencia) == 1:    
-            restas_min_diferencia = restas_min_diferencia[0]
-            
-        #* Segundo criterio: emdW1U
-        elif len(restas_min_diferencia) > 1:
-            min_emdW1U = min(d['emdW1U'] for d in restas_min_diferencia)
-            emdW1U_min_valor = [d for d in restas_min_diferencia if d['emdW1U'] == min_emdW1U]
-            # print()
-            # print("Restas con menor emdW1U")
-            # for x in emdW1U_min_valor:
-            #     print("elemento", x["elemento"], "emdw_1_u", x["emdW1U"], "EMD", x["diferencia"], "biparticion", x["biparticion"])
+            # Filtra todos los elementos con esa diferencia mínima
+            minimosResultados = [x for x in siBiparticion if x["resultado"] == minResultadoValor]
+            if len(minimosResultados) > 0:
+                #* comparar el valor de la union
+                min_diferencia_union_valor = min(minimosResultados, key=lambda x: x["RE1"]["emd"])["RE1"]["emd"]
+                min_diferencia_union = [x for x in minimosResultados if x["RE1"]["emd"] == min_diferencia_union_valor]
                 
-            #* Tercer criterio: biparticion
-            
-            if len(emdW1U_min_valor) == 1:
-               restas_min_diferencia = emdW1U_min_valor[0] 
-            elif len(emdW1U_min_valor) > 1:
-                biparticion = [d for d in emdW1U_min_valor if d['biparticion']["esBipartita"] == True]
-                # print()
-                # print("Restas con biparticion")
-                # print("Biparticion", biparticion)
+                # print("Min diferencia union", min_diferencia_union)
                 
-                #* si hay varias que ya cumplen los tres criterios se elige la primera
-                if len(biparticion) >= 2:
-                    restas_min_diferencia = biparticion[0]
-                elif len(biparticion) == 1:
-                    restas_min_diferencia = biparticion[0]
-                    #* si no hay ninguna que cumpla con el tercer criterio significa que las que quedan no tienen biparticion por lo cual se tiene que elegir la que tenga menor diferencia
-                elif len(biparticion) == 0:
-                    #* ordernar la diferencia de menor a mayor
-                    emdW1U_min_valor = sorted(emdW1U_min_valor, key=lambda x: x['diferencia'])
-                    #* elegir la primera
-                    restas_min_diferencia = emdW1U_min_valor[0]
-                    
-        elif restas_min_diferencia == 1:
-            restas_min_diferencia = restas_min_diferencia[0]
+                #* Hayan uno o más elementos con la misma diferencia, se selecciona el primero ya que no hay más criterios de desempate
+                siParticionMenorDiferencia = min_diferencia_union[0]
+                
+        # print("Si genera biparticion menor diferencia", siParticionMenorDiferencia)
+        if siParticionMenorDiferencia is not None:
+            particionesCandidatas.append(siParticionMenorDiferencia)
             
-        # print("Elegida \n", restas_min_diferencia)
-        
-        
-        valoresI = copy.deepcopy(W[i-1])
-        valoresI.append(restas_min_diferencia["elemento"])
-        W[i] = valoresI
-        restas = []
-        
-        if i == len(A):
-            SecuenciaResultante = []
-            for x in W:
-                if x == []:
-                    continue
-                #*agregar el elemento de la ultima posicion de x
-                SecuenciaResultante.append(x[-1])
-            # print("SECUENCIA RESULTANTE", SecuenciaResultante)
-            parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
-            # print("Par candidato", parCandidato)
-    
-            uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
-            nombreU = ""
-            if(len(listaDeUPrimas) == 0):
-                nombreU = "u1"
-            else:
-                nombreU = "u" + str(len(listaDeUPrimas) + 1)
-            listaDeUPrimas.append({nombreU: uActual})
+        if len(noBiparticion) > 0:
+            #* seleccionar la menor diferencia de EMD
+            minResultadoValor = min(noBiparticion, key=lambda x: x["resultado"])["resultado"]
 
-            #* nuevoA = los elementos de A que no son el par candidato + nombre del uActual
-            nuevoA = []
-            nuevoA = [elem for elem in A if elem not in parCandidato]
-            nuevoA = nuevoA + [nombreU]
+            # Filtra todos los elementos con esa diferencia mínima
+            minimosResultados = [x for x in noBiparticion if x["resultado"] == minResultadoValor]
+            if len(minimosResultados) > 0:
+                #* comparar el valor de la union
+                min_diferencia_union_valor = min(minimosResultados, key=lambda x: x["RE1"]["emd"])["RE1"]["emd"]
+                min_diferencia_union = [x for x in minimosResultados if x["RE1"]["emd"] == min_diferencia_union_valor]
+                
+                # print("Min diferencia union", min_diferencia_union)
+                
+                #* Hayan uno o más elementos con la misma diferencia, se selecciona el primero ya que no hay más criterios de desempate
+                noParticionMenorDiferencia = min_diferencia_union[0]
+
+        if noParticionMenorDiferencia is not None:
+            #* TODO: MIRAR QUE NO SE PARTA NI CON 2,3,4 ... K
+            print("No genera biparticion menor diferencia", noParticionMenorDiferencia)
+            valoresI = copy.deepcopy(W[i-1])
+            valoresI.append(noParticionMenorDiferencia["elemento"])
+            W[i] = valoresI
+            restas = []
             
-            # print("Nuevo A", nuevoA)
-            # if len(nuevoA) >= 2:
-            #     algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
+            if i == len(A):
+                SecuenciaResultante = []
+                for x in W:
+                    if x == []:
+                        continue
+                    #*agregar el elemento de la ultima posicion de x
+                    SecuenciaResultante.append(x[-1])
+                # print("SECUENCIA RESULTANTE", SecuenciaResultante)
+                parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
+                # print("Par candidato", parCandidato)
+        
+                uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
+                nombreU = ""
+                if(len(listaDeUPrimas) == 0):
+                    nombreU = "u1"
+                else:
+                    nombreU = "u" + str(len(listaDeUPrimas) + 1)
+                listaDeUPrimas.append({nombreU: uActual})
+
+                #* nuevoA = los elementos de A que no son el par candidato + nombre del uActual
+                nuevoA = []
+                nuevoA = [elem for elem in A if elem not in parCandidato]
+                nuevoA = nuevoA + [nombreU]
+                
+                print("Nuevo A", nuevoA)
+                if len(nuevoA) >= 2:
+                    algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
             
 algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos)
+# print("Particiones candidatas", particionesCandidatas)
