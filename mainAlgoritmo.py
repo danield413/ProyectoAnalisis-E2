@@ -235,35 +235,41 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
                 #*agregar el elemento de la ultima posicion de x
                 SecuenciaResultante.append(x[-1])
             print("SECUENCIA RESULTANTE", SecuenciaResultante)
-            # parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
-            # # print("Par candidato", parCandidato)
+            parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
+            print("Par candidato", parCandidato)
     
-            # uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
-            # nombreU = ""
-            # if(len(listaDeUPrimas) == 0):
-            #     nombreU = "u1"
-            # else:
-            #     nombreU = "u" + str(len(listaDeUPrimas) + 1)
-            # listaDeUPrimas.append({nombreU: uActual})
-
-            # #* nuevoA = los elementos de A que no son el par candidato + nombre del uActual
-            # nuevoA = []
-            # nuevoA = [elem for elem in A if elem not in parCandidato]
-            # nuevoA = nuevoA + [nombreU]
+            uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
+            nombreU = ""
+            if(len(listaDeUPrimas) == 0):
+                nombreU = "u1"
+            else:
+                nombreU = "u" + str(len(listaDeUPrimas) + 1)
+            listaDeUPrimas.append({nombreU: uActual})
             
-            # print("Nuevo A", nuevoA)
-            # if len(nuevoA) >= 2:
-            #     algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
+            # print("Lista de U'", listaDeUPrimas)
+
+            #* nuevoA = los elementos de A que no son el par candidato + nombre del uActual
+            nuevoA = []
+            nuevoA = [elem for elem in A if elem not in parCandidato]
+            nuevoA = nuevoA + [nombreU]
+            
+            print("Nuevo A", nuevoA)
+            if len(nuevoA) >= 2:
+                algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
        
             
             
 algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos)
-print()
-print()
+# print()
+# print()
+print("Cantidad de cantidatas generadas:", len(particionesCandidatas))
 print("candidatas")
 for c in particionesCandidatas:
     print(c)
     
+print()
+print()
+print("Cantidad de k-particiones generadas:", len(iteraciones_k_particionesGeneradas))
 print("k-particiones")
 for k in iteraciones_k_particionesGeneradas:
     print(k[0], 'iteracion', k[1])
