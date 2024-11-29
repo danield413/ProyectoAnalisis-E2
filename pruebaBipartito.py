@@ -71,6 +71,6 @@ aristas = ['at-at+1', 'bt-at+1', 'ct-at+1']
 aristas2 = ['at-at+1', 'at-bt+1', 'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1']
 
 matriz = (crearMatrizDeAdyacencia(aristas2, subconjuntoSistemaCandidato))
-print(matriz)
+# print(matriz)
 
-print(esBipartita(matriz))
+# print(esBipartita(matriz))
