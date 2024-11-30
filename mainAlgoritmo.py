@@ -292,6 +292,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         
         if len(restas) == 0:
             continue
+        
         #sacar las restas que tengan la menor diferencia (pueden ser varias)
         min_diferencia = min(d['resultado'] for d in restas)
         restas_min_diferencia = [d for d in restas if d['resultado'] == min_diferencia]
@@ -416,7 +417,15 @@ random_index = random.randint(0, len(particionesCandidatasFinales) - 1)
 print("random_index", random_index)
 
 for a in particionesCandidatasFinales:
-    print(a)
+    print( obtenerRepresentacion(a, elementosT, elementosT1) )
+    print()
+    
+def obtenerIteracionKParticiones(iteraciones_k_particionesGeneradas):
+    if not iteraciones_k_particionesGeneradas:
+        return None  # O un valor que indique que la lista está vacía
 
-x = obtenerRepresentacion(particionesCandidatasFinales[random_index], elementosT, elementosT1)
-print(x)
+    minimaIteracion = min(x[1] for x in iteraciones_k_particionesGeneradas)
+    return minimaIteracion
+
+print("Primera iteración donde se obtuvieron k-particiones", obtenerIteracionKParticiones(iteraciones_k_particionesGeneradas))
+    
