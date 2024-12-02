@@ -351,8 +351,11 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             if len(nuevoA) >= 2:
                 algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
        
-
+inicio = time.time()
 algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos)
+fin = time.time()
+print(f"Tiempo de ejecución: {fin - inicio:.6f} segundos")
+
 
 print()
 print()
@@ -360,7 +363,5 @@ particionesCandidatasFinales =  filtrar_diccionarios_unicos(particionesCandidata
 
 for a in particionesCandidatasFinales:
     representacion = obtenerRepresentacion(a, elementosT, elementosT1)
-    if representacion['informacion']['resultado'] >= 0:
-        print(representacion['particion1'], representacion['particion2'], representacion['informacion']['resultado'])
-    
+    print(representacion['particion1'], representacion['particion2'], representacion['informacion']['resultado'], representacion['informacion']['distribucion'])
     
