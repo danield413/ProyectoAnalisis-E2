@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import wasserstein_distance
+import copy
 
 def generarMatrizPresenteInicial(n):
     # Generar un array de números de 0 a 2^n - 1
@@ -176,3 +177,54 @@ def seleccionarCandidata(particionesCandidatasFinales):
     particion = [d for d in particionesCandidatasFinales if d['resultado'] == minimo]
     return particion[0]   
             
+            
+            
+def obtenerRepresentacion(particionFinal, elementosT, elementosT1):
+    
+    matriz = copy.deepcopy( particionFinal['matrizConexiones'] )
+    
+    particion1 = []
+    
+    #* Primero para filas
+    for i in range(len(matriz)):
+        if np.all(matriz[i] == 0):
+            # print("Fila", i, "es cero")
+            particion1.append(elementosT[i])
+            
+    #* Luego para columnas
+    matriz = matriz.T
+    for i in range(len(matriz)):
+        if np.all(matriz[i] == 0):
+            # print("Columna", i, "es cero")
+            particion1.append(elementosT1[i])
+            
+    tuplaParticion1 = ( [], [] )
+    for elemento in particion1:
+        if 't+1' in elemento:
+            tuplaParticion1[0].append(elemento)
+        elif 't' in elemento and 't+1' not in elemento:
+            tuplaParticion1[1].append(elemento)
+            
+    particionComplemento = ( [], [] )
+    for elemento in elementosT:
+        if elemento not in tuplaParticion1[1]:
+            particionComplemento[1].append(elemento)
+    
+    for elemento in elementosT1:
+        if elemento not in tuplaParticion1[0]:
+            particionComplemento[0].append(elemento)
+            
+    
+    return {
+        'particion1': tuplaParticion1,
+        'particion2': particionComplemento,
+        'matriz': matriz,
+        'informacion': particionFinal
+    }
+    
+def obtenerIteracionKParticiones(iteraciones_k_particionesGeneradas):
+    if not iteraciones_k_particionesGeneradas:
+        return None  # O un valor que indique que la lista está vacía
+
+    minimaIteracion = min(x for x in iteraciones_k_particionesGeneradas)
+    return minimaIteracion

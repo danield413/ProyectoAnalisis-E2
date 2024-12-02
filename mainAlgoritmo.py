@@ -5,7 +5,7 @@ import time
 
 from utilidades.background import aplicarCondicionesBackground
 from utilidades.marginalizacionInicial import aplicarMarginalizacion
-from utilidades.utils import filtrar_diccionarios_unicos, generarMatrizPresenteInicial, producto_tensorial_n, seleccionarCandidata
+from utilidades.utils import filtrar_diccionarios_unicos, generarMatrizPresenteInicial, obtenerIteracionKParticiones, obtenerRepresentacion, producto_tensorial_n, seleccionarCandidata
 from utilidades.utils import generarMatrizFuturoInicial
 from utilidades.utils import elementosNoSistemaCandidato
 from utilidades.utils import producto_tensorial
@@ -209,7 +209,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         print("\n Para la iteracion exterior i", i, "\n")
         
         elementosRecorrer = [elem for elem in A if elem not in W[i-1]]
-        print("Elementos a recorrer", elementosRecorrer)
+        # print("Elementos a recorrer", elementosRecorrer)
         for elemento in elementosRecorrer:
             wi_1Uelemento = W[i-1] + [elemento]
             
@@ -239,7 +239,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             
             # Verificar si se genera biparticion (le pase el W)
             # print("antes de llamar m ady", subconjuntoSistemaCandidato)
-            print("W[i-1] U {u}", wi_1Uelemento)
+            # print("W[i-1] U {u}", wi_1Uelemento)
             
             nuevoWi_1Uelemento = []
             for arista in wi_1Uelemento:
@@ -282,7 +282,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         restasKParticiones = [d for d in restas if d['biparticion']['esBipartita'] == False and d['biparticion']['k-particiones'] > 2]
         
         for elem in restasKParticiones:
-            iteraciones_k_particionesGeneradas.append((elem, i))
+            iteraciones_k_particionesGeneradas.append(i)
         
         #* Aplicar criterios
         
@@ -318,7 +318,7 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
         valoresI = copy.deepcopy(W[i-1])
         valoresI.append(elegido["elemento"])
         W[i] = valoresI
-        print("Se escogió", elegido["elemento"])
+        # print("Se escogió", elegido["elemento"])
         restas = []
         
         if i == len(A):
@@ -328,9 +328,9 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
                     continue
                 #*agregar el elemento de la ultima posicion de x
                 SecuenciaResultante.append(x[-1])
-            print("SECUENCIA RESULTANTE", SecuenciaResultante)
+            # print("SECUENCIA RESULTANTE", SecuenciaResultante)
             parCandidato = (SecuenciaResultante[-2], SecuenciaResultante[-1])
-            print("Par candidato", parCandidato)
+            # print("Par candidato", parCandidato)
     
             uActual = [SecuenciaResultante[-2], SecuenciaResultante[-1]]
             nombreU = ""
@@ -347,85 +347,20 @@ def algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estad
             nuevoA = [elem for elem in A if elem not in parCandidato]
             nuevoA = nuevoA + [nombreU]
             
-            print("Nuevo A", nuevoA)
+            # print("Nuevo A", nuevoA)
             if len(nuevoA) >= 2:
                 algoritmo(nuevaTPM, subconjuntoElementos, nuevoA, estadoActualElementos)
        
 
 algoritmo(nuevaTPM, subconjuntoElementos, subconjuntoSistemaCandidato, estadoActualElementos)
 
-# print()
-# print()
+print()
+print()
 particionesCandidatasFinales =  filtrar_diccionarios_unicos(particionesCandidatas)
 
-# # particionFinal = seleccionarCandidata(particionesCandidatasFinales)
-# # print("Partición final")
-# # print(particionFinal)
-
-def obtenerRepresentacion(particionFinal, elementosT, elementosT1):
-    
-    matriz = copy.deepcopy( particionFinal['matrizConexiones'] )
-    
-    # print(elementosT)
-    # print(elementosT1)
-    
-    particion1 = []
-    
-    #* Primero para filas
-    for i in range(len(matriz)):
-        if np.all(matriz[i] == 0):
-            print("Fila", i, "es cero")
-            particion1.append(elementosT[i])
-            
-    #* Luego para columnas
-    matriz = matriz.T
-    for i in range(len(matriz)):
-        if np.all(matriz[i] == 0):
-            print("Columna", i, "es cero")
-            particion1.append(elementosT1[i])
-            
-    tuplaParticion1 = ( [], [] )
-    for elemento in particion1:
-        if 't+1' in elemento:
-            tuplaParticion1[0].append(elemento)
-        elif 't' in elemento and 't+1' not in elemento:
-            tuplaParticion1[1].append(elemento)
-            
-    print("Particion 1", tuplaParticion1)
-    
-    particionComplemento = ( [], [] )
-    for elemento in elementosT:
-        if elemento not in tuplaParticion1[1]:
-            particionComplemento[1].append(elemento)
-    
-    for elemento in elementosT1:
-        if elemento not in tuplaParticion1[0]:
-            particionComplemento[0].append(elemento)
-            
-    # print("Particion complemento", particionComplemento)
-    
-    return {
-        'particion1': tuplaParticion1,
-        'particion2': particionComplemento,
-        'matriz': matriz,
-        'informacion': particionFinal
-    }
-    
-    
-# #* generar numero random entre 0 y len(particionesCandidatasFinales)
-random_index = random.randint(0, len(particionesCandidatasFinales) - 1)
-print("random_index", random_index)
-
 for a in particionesCandidatasFinales:
-    print( obtenerRepresentacion(a, elementosT, elementosT1) )
-    print()
+    representacion = obtenerRepresentacion(a, elementosT, elementosT1)
+    if representacion['informacion']['resultado'] >= 0:
+        print(representacion['particion1'], representacion['particion2'], representacion['informacion']['resultado'])
     
-def obtenerIteracionKParticiones(iteraciones_k_particionesGeneradas):
-    if not iteraciones_k_particionesGeneradas:
-        return None  # O un valor que indique que la lista está vacía
-
-    minimaIteracion = min(x[1] for x in iteraciones_k_particionesGeneradas)
-    return minimaIteracion
-
-print("Primera iteración donde se obtuvieron k-particiones", obtenerIteracionKParticiones(iteraciones_k_particionesGeneradas))
     

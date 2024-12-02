@@ -5,7 +5,7 @@ from utilidades.utils import buscarValorUPrima, producto_tensorial_n, generarMat
 
 def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, partirMatricesTPM, estadoActualElementos, subconjuntoElementos, elementosT, indicesElementosT, nuevaMatrizPresente, listaDeUPrimas):
 
-    print("conjunto", conjunto)
+    # print("conjunto", conjunto)
     # print("partirMatricesPresentes", partirMatricesPresentes)
 
     # Diccionario donde se guardarán las relaciones
@@ -45,7 +45,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
     for matrizAMarginalizar in relaciones:
         #* Se toman sus elementos presentes a marginalizar
         elementosPresentesAMarginalizar = relaciones[matrizAMarginalizar]
-        print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
+        # print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
         
         #*Cuando se marginalizan todas las columnas de una matriz
         if len(elementosPresentesAMarginalizar) == len(partirMatricesPresentes[0]):
@@ -67,7 +67,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
             })
             continue
         
-        print("ELEMENTOS T", elementosT)
+        # print("ELEMENTOS T", elementosT)
         #* Se toman los elementos presentes que no se van a marginalizar
         elementosPresentesNOAMarginalizar = [elem for elem in elementosT if elem not in elementosPresentesAMarginalizar]
         
@@ -79,9 +79,9 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         #* Se toman los índices de los elementos presentes a marginalizar
         indicesElementosPresentesAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesAMarginalizar]
         indicesElementosPresentesNOAMarginalizar = [indicesElementosT[elemento] for elemento in elementosPresentesNOAMarginalizar]
-        print("indicesElementosPresentesNOAMarginalizar", indicesElementosPresentesNOAMarginalizar)
-        print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
-        print("indicesElementosPresentesAMarginalizar", indicesElementosPresentesAMarginalizar)
+        # print("indicesElementosPresentesNOAMarginalizar", indicesElementosPresentesNOAMarginalizar)
+        # print("elementosPresentesAMarginalizar", elementosPresentesAMarginalizar)
+        # print("indicesElementosPresentesAMarginalizar", indicesElementosPresentesAMarginalizar)
 
         nuevosIndices = []
         count = 0
@@ -142,8 +142,8 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         tpmActual = np.delete(tpmActual, filas_a_eliminar, axis=0)
         mPresente = np.delete(mPresente, filas_a_eliminar, axis=0)
         
-        print("mPresente", mPresente)
-        print("tpmactual", tpmActual)
+        # print("mPresente", mPresente)
+        # print("tpmactual", tpmActual)
 
         #* Tomar cada valor de la tpm y asociarlo a su respectiva fila de la TPM
         valores = {}
@@ -215,7 +215,7 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
         resultado_sin_x = [elemento.replace('x', '') for elemento in resultado]
         tpmActualCopia = []
         
-        print("valores", valores)
+        # print("valores", valores)
         
         #* Se toman los valores de la tpm que coinciden con los resultados sin x
         for i in range(len(resultado_sin_x)):
@@ -244,36 +244,36 @@ def obtenerVector(conjunto, partirMatricesPresentes, partirMatricesFuturas, part
     for i in subconjuntoElementos:
         ordenColumnasPresente.append(i)
         
-    print("ordenColumnasPresente", ordenColumnasPresente)
+    # print("ordenColumnasPresente", ordenColumnasPresente)
     ordenColumnas = []
     for i in ordenColumnasPresente:
         if i in elementosT:
             ordenColumnas.append(i)
             
-    print("ordernColumnas", ordenColumnas)
+    # print("ordernColumnas", ordenColumnas)
         
     for i in estadoActualElementos:
         if list(i.keys())[0] in ordenColumnas:
             estadosActuales.append(list(i.values())[0])
             
-    print("estadosActuales", estadosActuales)
-    print("elementosT", elementosT)
+    # print("estadosActuales", estadosActuales)
+    # print("elementosT", elementosT)
     
-    print("nuevaMatrizPresente", nuevaMatrizPresente)
+    # print("nuevaMatrizPresente", nuevaMatrizPresente)
     indiceVector = -1
     for i in range(len(nuevaMatrizPresente)):
         if nuevaMatrizPresente[i].tolist() == estadosActuales:
             indiceVector = i
             break
     
-    print("indiceVector", indiceVector)
+    # print("indiceVector", indiceVector)
     
     #* Se toman los vectores de las matrices resultado usando el indiceVector
     vectoresUtilizar = []
     for matriz in matricesResultado:
         vectoresUtilizar.append(matriz[list(matriz.keys())[0]])
         
-    print("vectoresUtilizar", vectoresUtilizar)
+    # print("vectoresUtilizar", vectoresUtilizar)
         
     #* Se toman los vectores que se van a multiplicar
     #* Si solo hay un vector, se toma directamente ese (sucede cuando se marginalizan todas las columnas de una matriz)
