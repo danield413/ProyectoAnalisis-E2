@@ -40,21 +40,12 @@ TPM = np.array([
 
 #? El subconjunto del sistema candidato a analizar (elementos en t y en t+1)
 subconjuntoSistemaCandidato = np.array([
-    'at-at+1', 'at-bt+1', 'at-ct+1', 'at-dt+1', 'at-et+1', 'at-ft+1', 'at-gt+1', 'at-ht+1', 'at-it+1', 'at-jt+1',
-    'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'bt-dt+1', 'bt-et+1', 'bt-ft+1', 'bt-gt+1', 'bt-ht+1', 'bt-it+1', 'bt-jt+1',
-    'ct-at+1', 'ct-bt+1', 'ct-ct+1', 'ct-dt+1', 'ct-et+1', 'ct-ft+1', 'ct-gt+1', 'ct-ht+1', 'ct-it+1', 'ct-jt+1',
-    'dt-at+1', 'dt-bt+1', 'dt-ct+1', 'dt-dt+1', 'dt-et+1', 'dt-ft+1', 'dt-gt+1', 'dt-ht+1', 'dt-it+1', 'dt-jt+1',
-    'et-at+1', 'et-bt+1', 'et-ct+1', 'et-dt+1', 'et-et+1', 'et-ft+1', 'et-gt+1', 'et-ht+1', 'et-it+1', 'et-jt+1',
-    'ft-at+1', 'ft-bt+1', 'ft-ct+1', 'ft-dt+1', 'ft-et+1', 'ft-ft+1', 'ft-gt+1', 'ft-ht+1', 'ft-it+1', 'ft-jt+1',
-    'gt-at+1', 'gt-bt+1', 'gt-ct+1', 'gt-dt+1', 'gt-et+1', 'gt-ft+1', 'gt-gt+1', 'gt-ht+1', 'gt-it+1', 'gt-jt+1',
-    'ht-at+1', 'ht-bt+1', 'ht-ct+1', 'ht-dt+1', 'ht-et+1', 'ht-ft+1', 'ht-gt+1', 'ht-ht+1', 'ht-it+1', 'ht-jt+1',
-    'it-at+1', 'it-bt+1', 'it-ct+1', 'it-dt+1', 'it-et+1', 'it-ft+1', 'it-gt+1', 'it-ht+1', 'it-it+1', 'it-jt+1',
-    'jt-at+1', 'jt-bt+1', 'jt-ct+1', 'jt-dt+1', 'jt-et+1', 'jt-ft+1', 'jt-gt+1', 'jt-ht+1', 'jt-it+1', 'jt-jt+1'
+    'at-at+1', 'at-bt+1',  'at-ct+1', 'bt-at+1', 'bt-bt+1', 'bt-ct+1', 'ct-at+1', 'ct-bt+1', 'ct-ct+1'
 ])
 
 #? SISTEMA CANDIDATO
 #? Subconjunto de elementos a analizar en t
-subconjuntoElementos = np.array(['at','bt','ct', 'dt', 'et', 'ft', 'gt', 'ht', 'it', 'jt'])
+subconjuntoElementos = np.array(['at','bt','ct'])
 
 #? El estado actual de todos los elementos del sistema
 estadoActualElementos = np.array([
@@ -62,11 +53,6 @@ estadoActualElementos = np.array([
     {'bt': 0},
     {'ct': 0},
     {'dt': 0},
-    {'et': 0},
-    {'ft': 0},
-    {'gt': 0},
-    {'ht': 0},
-    {'it': 0},
-    {'jt': 0},
+    {'et': 1},
 ])
 
